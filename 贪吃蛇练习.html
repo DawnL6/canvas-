@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    <canvas id="canvas" width="480" height="480" style="background:#abcdef"></canvas>
+    <div>
+        <label for="">游戏难度</label>
+        <select name="hard" onchange="speed = parseInt(this.value)">
+            <option value="200">正常</option>
+            <option value="150">中等</option>
+            <option value="100">困难</option>
+        </select>
+    </div>
+    <button onclick="starts()">开始</button>
+    <button onclick="window.location.reload()">重新开始</button>
+    <script>
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext('2d');
+    var direction = 39; //默认方向
+    var x = y = 8; //蛇头的位子
+    var size = 8; //蛇单元大小
+    var map = []; //存放蛇的数组
+    var t = 10; //蛇身长
+    var c = 0;//食物坐标
+    var source = 0;//分数
+    var speed = parseInt(document.getElementsByName('hard')[0].value); //初始速度
+    //画布的长宽
+    var w = canvas.width;
+    var h = canvas.height;
+    //蛇移动
+    function starts() {
+        window.setInterval(move,speed);
+    }
+    function move() {
+        switch (direction) {
+            case 38:
+                y = y - size;
+                break;
+            case 39:
+                x = x + size;
+                break;
+            case 40:
+                y = y + size;
+                break;
+            case 37:
+                x = x - size;
+                break;
+        }
+        if (x > w || y > h || x < 0 || y < 0) { //撞到墙壁挂了
+            alert("你死了");
+            alert("你本次得分" + source + "分！");
+            window.location.reload();
+        }
+        for (var i = 0; i < map.length; i++) {
+            if ((map[i].x == x) && (map[i].y == y)) {
+                alert("撞的自己的身体了");
+                alert("你本次得分" + source + "分！");
+                window.location.reload();
+            }
+        }
+        map.push({
+            "x": x,
+            "y": y
+        });
+        if (map.length > t) {
+            var nmap = map.shift(); //删除数组的第一个元素 返回给nmap
+            context.clearRect(nmap["x"], nmap["y"], size, size); //重绘
+        }
+        context.fillStyle = "#fe7a00";
+        context.fillRect(x, y, size, size);
+        if (c * 8 == x && c * 8 == y) { //如果坐标一样的话  就吃食物
+            food();
+            t++; //蛇的长度增加
+            source++;//得分
+            if (speed < 90) return;
+            speed--;//加速度
+            window.clearInterval(ins);
+            ins = window.setInterval(move,speed);
+        }
+    }
+    document.onkeydown = function(e) { //改变蛇方向
+        var code = e.keyCode;
+        if (Math.abs(code - direction) === 2) return;
+        if (code < 37 || code > 40) return;
+        if (code == 39) {
+            direction = 39;
+        }
+        if (code == 38) {
+            direction = 38;
+        }
+        if (code == 40) {
+            direction = 40;
+        }
+        if (code == 37) {
+            direction = 37;
+        }
+    };
+    function food() { //产生随机食物
+        c = Math.ceil(Math.random() * (w / size));
+        context.fillStyle = "#333";
+        context.fillRect(c * 8, c * 8, 8, 8); //绘制矩形 
+    }
+    food();
+    </script>
+</body>
+</html>
